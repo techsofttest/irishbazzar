@@ -121,5 +121,36 @@
         margin: 10px 0px;
     }
 
+    .ff-side-mainsec
+    {
+    position:relative !important;
+    top:unset !important;
+    }
+
+    .ff-right-mainsec
+    {
+
+    margin-top:10px !important;
+
+    }
+
+    .product-inner-ss .tt-product .tt-image-box img
+    {
+
+    height: 100% !important;
+
+    }
+
+    .main-menu .login-img ul.sub-menu
+    {
+        left: 0;
+    }
+
+    .Delvery-address-new
+    {
+    padding: 20px 20px 20px 20px !important;
+    text-align: center !important;
+    }
+
    
 }

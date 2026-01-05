@@ -81,8 +81,19 @@
             <h3 class="widget_title">My Account</h3>
             <div class="menu-all-pages-container">
               <ul class="menu">
- <li><a href="#"  data-bs-toggle="modal" data-bs-target="#youmyModal">My Account</a></li>
-       <li><a href="cart.html"> My Cart</a></li>
+
+              @php
+    $customer = auth('customer')->user();
+@endphp
+
+
+@if($customer)
+<li><a href="{{url('profile')}}">My Account</a></li>
+@else
+<li><a href="#"  data-bs-toggle="modal" data-bs-target="#youmyModal">My Account</a></li>
+ @endif
+       
+              <li><a href="{{url('cart')}}"> My Cart</a></li>
  
                 
               </ul>

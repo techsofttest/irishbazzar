@@ -21,7 +21,7 @@
   <div class="container-fluid">
   <div class="row">
   
-  <div class="col-lg-8">
+  <div class="col-lg-8 order-2 order-lg-1">
 
   @guest('customer')
 
@@ -416,7 +416,7 @@
   
   </div>
   
-  <div class="col-lg-4">
+  <div class="col-lg-4 order-1 order-lg-2">
   
     <div class="checkoutlast-sticky">
   <div class="checkoutlast">
