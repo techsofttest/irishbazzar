@@ -22,7 +22,7 @@
 
 <link rel="stylesheet" href="{{asset('css/app.min.css')}}">
 <link rel="stylesheet" href="{{asset('css/fa.min.css')}}">
-<link rel="stylesheet" href="{{asset('css/style.min.css')}}">
+<link rel="stylesheet" href="{{asset('css/style.min.css?v1.0')}}">
 <link rel="stylesheet" href="{{asset('css/responsive.css')}}">
 <link rel="stylesheet" href="{{asset('css/owl.carousel.css')}}">
 
