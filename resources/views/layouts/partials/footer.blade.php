@@ -125,7 +125,7 @@
   <div class="footer-paymentsec">
       <div class="container-fluid">
 	  <div class="row justify-content-center align-items-center">
-	  <div class="col-auto">
+	  <div class="col-auto my-2">
 	  <ul class="socials-list text-center">
                 <li> <a href="#" target="_blank"> <img src="{{asset('img/ss1.png')}}"> </a> </li>
                 <li> <a href="#" target="_blank"> <img src="{{asset('img/ss2.png')}}">  </a> </li>
@@ -133,7 +133,7 @@
                 <li> <a href="#" target="_blank"> <img src="{{asset('img/ss4.png')}}">  </a> </li>
               </ul>
 	  </div>
-	  	  <div class="col-auto">
+	  	  <div class="col-auto my-2">
 	      <div class="payment text-center"> 
 		  <img src="{{asset('img/pay1.jpg')}}" alt=""> <img src="{{asset('img/pay2.jpg')}}" alt=""> <img src="{{asset('img/pay3.jpg')}}" alt=""> <img src="{{asset('img/pay4.jpg')}}" alt=""> <img src="{{asset('img/pay5.jpg')}}" alt=""> <img src="{{asset('img/pay7.jpg')}}" alt=""> </div>
         </div>

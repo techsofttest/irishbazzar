@@ -113,11 +113,32 @@ Route::middleware('auth:customer')->group(function () {
 
     Route::get('/addresses', [ProfileController::class, 'addresses'])->name('addresses');
 
+    /*
     Route::get('/addresses/list', [ProfileController::class, 'addressList']);
     Route::post('/addresses/store', [ProfileController::class, 'storeAddress']);
     Route::post('/addresses/update/{id}', [ProfileController::class, 'updateAddress']);
     Route::delete('/addresses/delete/{id}', [ProfileController::class, 'deleteAddress']);
     Route::post('/addresses/default/{id}', [ProfileController::class, 'setDefault']);
+    */
+
+    Route::get('/addresses/create', [ProfileController::class, 'create_address'])
+    ->name('addresses.create');
+
+    Route::post('/addresses', [ProfileController::class, 'store_address'])
+        ->name('addresses.store');
+
+
+    Route::get('/addresses/{address}/edit', [ProfileController::class, 'edit_address'])
+        ->name('addresses.edit');
+
+    Route::put('/addresses/{address}', [ProfileController::class, 'update_address'])
+        ->name('addresses.update');
+
+    Route::delete('/addresses/{address}', [ProfileController::class, 'destroy_address'])
+        ->name('addresses.destroy');
+
+    Route::post('/addresses/{address}/default', [ProfileController::class, 'setDefault_address'])
+        ->name('addresses.default');
 
 
 

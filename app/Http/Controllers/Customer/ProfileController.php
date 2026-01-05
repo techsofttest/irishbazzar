@@ -70,86 +70,136 @@ class ProfileController extends Controller
 
 
 
-    /* Addess Management */
+        /* Addess Management */
 
-        public function addresses()
-        {
-            return view('user.addresses');
+    public function addresses()
+    {
+
+        $data['addresses'] = auth('customer')->user()->addresses()->orderByDesc('is_default')->get();
+
+        return view('user.addresses',$data);
+
+    }
+
+
+
+    public function create_address()
+    {
+
+        return view('user.address-add');
+
+    }
+
+
+
+    public function store_address(Request $request)
+    {
+        $data = $request->validate([
+            'fullname'       => 'required|string',
+            'email'          => 'nullable|email',
+            'phone'          => 'nullable|string',
+            'address_line1'  => 'required|string',
+            'city'           => 'required|string',
+            'state'          => 'nullable|string',
+            'country'        => 'required|string',
+            'postal_code'    => 'nullable|string',
+            'address_type'   => 'required|in:home,work',
+            'is_default'     => 'nullable|boolean',
+        ]);
+
+        $data['customer_id'] = auth('customer')->id();
+
+        // If first address OR marked default → unset others
+        if (!CustomerAddress::where('customer_id', $data['customer_id'])->exists()
+            || ($request->boolean('is_default'))
+        ) {
+            CustomerAddress::where('customer_id', $data['customer_id'])
+                ->update(['is_default' => false]);
+
+            $data['is_default'] = true;
         }
 
-        public function addressList()
-        {
-            return auth('customer')->user()->addresses()->orderByDesc('is_default')->get();
+        CustomerAddress::create($data);
+
+        return redirect()->route('addresses')
+            ->with('success', 'Address added successfully');
+    }
+
+
+
+
+
+
+    public function edit_address(CustomerAddress $address)
+    {
+        $this->authorizeAddress($address);
+
+        return view('user.address-edit', compact('address'));
+    }
+
+    public function update_address(Request $request, CustomerAddress $address)
+    {
+        $this->authorizeAddress($address);
+
+        $data = $request->validate([
+            'fullname'       => 'required|string',
+            'email'          => 'nullable|email',
+            'phone'          => 'nullable|string',
+            'address_line1'  => 'required|string',
+            'city'           => 'required|string',
+            'state'          => 'nullable|string',
+            'country'        => 'required|string',
+            'postal_code'    => 'nullable|string',
+            'address_type'   => 'required|in:home,work',
+        ]);
+
+        $address->update($data);
+
+        return redirect()->route('addresses')
+            ->with('success', 'Address updated successfully');
         }
 
-        public function storeAddress(Request $request)
+        public function destroy_address(CustomerAddress $address)
         {
-            $customer = auth('customer')->user();
+            $this->authorizeAddress($address);
 
-            if ($request->is_default) {
-                $customer->addresses()->update(['is_default' => false]);
-            }
+            $address->delete();
 
-            return CustomerAddress::create([
-                'customer_id' => $customer->id,
-                'label' => $request->addressType,
-                'fullname' => $request->fullName,
-                'address_line1' => $request->addressLine1,
-                'address_line2' => $request->addressLine2,
-                'city' => $request->city,
-                'state' => $request->state,
-                'country' => $request->country,
-                'postal_code' => $request->zipCode,
-                'address_type' => strtolower($request->addressType),
-                'is_default' => $request->isDefault ?? false,
-            ]);
+            return back()->with('success', 'Address deleted successfully');
         }
 
-        public function updateAddress(Request $request, $id)
+        public function setDefault_address(CustomerAddress $address)
         {
-            $address = CustomerAddress::where('customer_id', auth('customer')->id())->findOrFail($id);
+            $this->authorizeAddress($address);
 
-            if ($request->isDefault) {
-                auth('customer')->user()->addresses()->update(['is_default' => false]);
-            }
-
-            $address->update([
-                'label' => $request->addressType,
-                'fullname' => $request->fullName,
-                'address_line1' => $request->addressLine1,
-                'address_line2' => $request->addressLine2,
-                'city' => $request->city,
-                'state' => $request->state,
-                'country' => $request->country,
-                'postal_code' => $request->zipCode,
-                'address_type' => strtolower($request->addressType),
-                'is_default' => $request->isDefault ?? false,
-            ]);
-
-            return response()->json(['success' => true]);
-        }
-
-        public function deleteAddress($id)
-        {
             CustomerAddress::where('customer_id', auth('customer')->id())
-                ->where('id', $id)
-                ->delete();
+                ->update(['is_default' => false]);
 
-            return response()->json(['success' => true]);
+            $address->update(['is_default' => true]);
+
+            return back()->with('success', 'Default address updated');
         }
 
-        public function setDefault($id)
+        private function authorizeAddress(CustomerAddress $address)
         {
-            $customer = auth('customer')->user();
-
-            $customer->addresses()->update(['is_default' => false]);
-            $customer->addresses()->where('id', $id)->update(['is_default' => true]);
-
-            return response()->json(['success' => true]);
+            abort_if(
+                $address->customer_id !== auth('customer')->id(),
+                403
+            );
         }
 
 
 
+
+
+
+
+        /* ADdress Management ewnd */
+
+
+       
+
+       
 
 
 

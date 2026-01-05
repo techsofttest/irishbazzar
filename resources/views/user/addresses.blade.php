@@ -8,6 +8,7 @@
 
 
      .address-card {
+            position:relative;
             background: white;
             border-radius: 12px;
             padding: 1.5rem;
@@ -25,6 +26,25 @@
         .address-card.default {
             border-color: var(--success-color);
             background: linear-gradient(to right, rgba(39, 174, 96, 0.05), white);
+        }
+
+        .address-badge
+        {
+            position: absolute;
+            width: -webkit-fit-content;
+            width: -moz-fit-content;
+            width: fit-content;
+            display: inline-block;
+            text-align: center;
+            background-color: var(--theme-color);
+            color: var(--white-color);
+            padding: .35em .55em;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 400;
+            right: 10px;
+            top: 10px;
+
         }
 
         .badge-default {
@@ -129,112 +149,77 @@
         @include('user.user-sidebar')
 
 
-<div class="col-lg-9 col-md-8">
+    <div class="col-lg-9 col-md-8">
+        
+    <div class="row">
 
-        <div class="row">
-            <div class="col-12 mb-4">
-                <button class="btn btn-add-address btn-custom" onclick="showAddressForm()">
-                    <i class="fas fa-plus me-2"></i>Add New Address
-                </button>
-            </div>
-        </div>
+    @foreach($addresses as $add)
 
-        <!-- Address Form (Hidden by default) -->
-        <div id="addressFormSection" class="row mb-4" style="display: none;">
-            <div class="col-12">
-                <div class="form-card">
-                    <h4 class="mb-4" id="formTitle">Add New Address</h4>
-                    <form id="addressForm">
-    @csrf
+    <div class="col-lg-12">
+                <div class="address-card @if($add->is_default==true) default @endif">
 
-    <input type="hidden" id="address_id" name="address_id">
+                    <span class="address-type">{{$add->address_type}}</span>
 
-    <div class="row g-3">
+                    @if($add->is_default==true)
+                    <span class="address-badge badge-default">Default</span>
+                    @endif
 
-        <div class="col-md-6">
-            <label class="form-label">Full Name *</label>
-            <input type="text" class="form-control" name="fullName" id="fullName" required>
-        </div>
+                    <h5>{{$add->fullname}}</h5>
 
-        <div class="col-md-6">
-            <label class="form-label">Phone Number *</label>
-            <input type="tel" class="form-control" name="phone" id="phone" required>
-        </div>
+                    <p>{{$add->address_line1}}</p>
 
-        <div class="col-12">
-            <label class="form-label">Address Line 1 *</label>
-            <input type="text" class="form-control" name="addressLine1" id="addressLine1" required>
-        </div>
+                    <p>{{$add->city}}, {{$add->state}}</p>
 
-        <div class="col-12">
-            <label class="form-label">Address Line 2</label>
-            <input type="text" class="form-control" name="addressLine2" id="addressLine2">
-        </div>
+                    <p>{{$add->country}} - {{$add->postal_code}}</p>
 
-        <div class="col-md-6">
-            <label class="form-label">City *</label>
-            <input type="text" class="form-control" name="city" id="city" required>
-        </div>
+                    <p>{{$add->phone}} - {{$add->email}}</p>
 
-        <div class="col-md-6">
-            <label class="form-label">State/Province *</label>
-            <input type="text" class="form-control" name="state" id="state" required>
-        </div>
+                     <a href="{{ route('addresses.edit', $add) }}"
+                    class="btn btn-primary btn-sm">
+                        Edit
+                    </a>
 
-        <div class="col-md-6">
-            <label class="form-label">ZIP/Postal Code *</label>
-            <input type="text" class="form-control" name="zipCode" id="zipCode" required>
-        </div>
+                    {{-- Delete --}}
+                    <form action="{{ route('addresses.destroy', $add) }}"
+                        method="POST"
+                        class="d-inline"
+                        onsubmit="return confirm('Delete this address?')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-danger btn-sm">
+                            Delete
+                        </button>
+                    </form>
 
-        <div class="col-md-6">
-            <label class="form-label">Country *</label>
-            <select class="form-select" name="country" id="country" required>
-                <option value="">Select Country</option>
-                <option value="India">India</option>
-                <option value="USA">United States</option>
-                <option value="UK">United Kingdom</option>
-                <option value="Canada">Canada</option>
-                <option value="Australia">Australia</option>
-            </select>
-        </div>
+                    {{-- Set Default --}}
+                    @if(!$add->is_default)
+                        <form action="{{ route('addresses.default', $add) }}"
+                            method="POST"
+                            class="d-inline">
+                            @csrf
+                            <button class="btn btn-warning btn-sm">
+                                Set Default
+                            </button>
+                        </form>
+                    @endif
 
-        <div class="col-md-6">
-            <label class="form-label">Address Type *</label>
-            <select class="form-select" name="addressType" id="addressType" required>
-                <option value="home">Home</option>
-                <option value="work">Work</option>
-            </select>
-        </div>
-
-        <div class="col-md-6">
-            <div class="form-check mt-4">
-                <input class="form-check-input" type="checkbox" name="isDefault" id="isDefault" value="1">
-                <label class="form-check-label">
-                    Set as default address
-                </label>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <hr class="my-4">
-            <button type="submit" class="btn btn-primary btn-custom me-2">
-                <i class="fas fa-save me-2"></i>Save Address
-            </button>
-            <button type="button" class="btn btn-secondary btn-custom" onclick="hideAddressForm()">
-                Cancel
-            </button>
-        </div>
-    </div>
-</form>
 
                 </div>
-            </div>
-        </div>
+    </div>
+    @endforeach
 
-        <!-- Address List -->
-        <div class="row" id="addressList">
-            <!-- Addresses will be displayed here -->
-        </div>
+
+    <div class="col-12 text-center">
+    <a href="{{ route('addresses.create') }}" class="btn btn-success mb-3">
+    + Add New Address
+    </a>
+    </div>
+
+
+    </div>
+
+        
+
     </div>
 
 
@@ -351,11 +336,6 @@
 
 
     </script>
-
-
-
-
-
 
 
 @endsection

@@ -104,5 +104,22 @@
         top:115px !important;
     }
 
+    .cart1-link
+    {
+        padding: 11px 10px !important;
+        font-size: 15px !important;
+    }
+
+     .cart2-link
+    {
+        padding: 11px 10px !important;
+        font-size: 15px !important;
+    }
+
+    .newsletter-style2
+    {
+        margin: 10px 0px;
+    }
+
    
 }

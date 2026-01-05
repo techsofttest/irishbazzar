@@ -104,23 +104,108 @@
 
 <h4 class="mb-3">Shipping Address</h4>
 
+
+<style>
+
+  .address-card {
+    display: block;
+    cursor: pointer;
+}
+
+.address-radio {
+    display: none;
+}
+
+.address-content {
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+    background-color: #fff;
+    transition: all 0.2s ease;
+}
+
+/* Selected */
+.address-radio:checked + .address-content {
+    border-color: #0d6efd;
+    background-color: #f0f7ff;
+}
+
+/* Hover */
+.address-content:hover {
+    border-color: #0d6efd;
+}
+
+  .address-type-badge{
+    background: grey;
+    padding: 5px;
+    border-radius: 10px;
+    margin: 5px 10px;
+  }
+
+</style>
+
 @auth('customer')
     @if($addresses->count())
-        <div class="mb-3">
-            <label class="form-label">Select Saved Address</label>
-            <select class="form-select" name="shipping_address_id" id="shipping_address_select">
-                <option value="">Enter new address</option>
+        <div class="mb-4">
+            <label class="form-label fw-bold mb-2">
+                Select Shipping Address
+            </label>
+
+            <div class="address-list">
+
+                {{-- Saved Addresses --}}
                 @foreach($addresses as $address)
-                    <option value="{{ $address->id }}">
-                        {{ ucfirst($address->type) }} – {{ $address->city }}
-                    </option>
+                    <label class="address-card w-100 mb-3">
+                        <input
+                            type="radio"
+                            name="shipping_address_id"
+                            value="{{ $address->id }}"
+                            class="address-radio shipping-address-radio"
+                            {{ $address->is_default ? 'checked' : '' }}
+                        >
+
+                        <div class="address-content">
+                            <strong class="address-type-badge">
+                                {{ ucfirst($address->address_type) }}
+                            </strong>
+
+                            @if($address->fullname)
+                                {{ $address->fullname }},
+                            @endif
+                             {{ $address->address_line1 }}…
+                        </div>
+                    </label>
                 @endforeach
-            </select>
+
+                {{-- Add New Address Option --}}
+                <label class="address-card w-100 mb-3">
+                    <input
+                        type="radio"
+                        name="shipping_address_id"
+                        value="new"
+                        class="address-radio shipping-address-radio"
+                    >
+
+                    <div class="address-content text-center text-muted">
+                        ➕ Add New Address
+                    </div>
+                </label>
+
+            </div>
         </div>
     @endif
 @endauth
 
-<div id="shipping_manual_form" class=" p-3 mb-4">
+
+<div
+    id="shipping_manual_form"
+    class="p-3 mb-4 border rounded"
+    style="
+        @auth('customer')
+            {{ $addresses->count() ? 'display:none;' : '' }}
+        @endauth
+    "
+>
     <div class="row g-3">
 
         <div class="col-md-12">
@@ -138,17 +223,35 @@
         <div class="col-12">
             <input type="text" name="shipping[address]" class="form-control" placeholder="Address" required>
         </div>
+
         <div class="col-md-4">
             <input type="text" name="shipping[city]" class="form-control" placeholder="City" required>
         </div>
+
         <div class="col-md-4">
             <input type="text" name="shipping[state]" class="form-control" placeholder="State" required>
         </div>
+
         <div class="col-md-4">
             <input type="text" name="shipping[pincode]" class="form-control" placeholder="Pincode" required>
         </div>
+
+
+        <div class="col-md-12">
+          <label class="fw-bold mb-1">Address Type</label>
+          <select name="shipping[address_type]" class="form-control" required>
+              <option value="home">Home</option>
+              <option value="work">Work</option>
+          </select>
+      </div>
+
+
+
     </div>
 </div>
+
+
+
 
 </div>
 
@@ -178,24 +281,67 @@
 
 <div id="billing_section" style="display:none;">
 
+
 @auth('customer')
     @if($addresses->count())
-        <div class="mb-3">
-            <label class="form-label">Select Billing Address</label>
-            <select class="form-select" name="billing_address_id" id="billing_address_select">
-                <option value="">Enter new address</option>
+        <div class="mb-4">
+            <label class="form-label fw-bold mb-2">
+                Select Billing Address
+            </label>
+
+            <div class="address-list">
+
+                {{-- Saved Addresses --}}
                 @foreach($addresses as $address)
-                    <option value="{{ $address->id }}">
-                        {{ ucfirst($address->type) }} – {{ $address->city }}
-                    </option>
+                    <label class="address-card w-100 mb-3">
+                        <input
+                            type="radio"
+                            name="billing_address_id"
+                            value="{{ $address->id }}"
+                            class="address-radio shipping-address-radio"
+                            {{ $address->is_default ? 'checked' : '' }}
+                        >
+
+                        <div class="address-content">
+                            <strong class="address-type-badge">
+                                {{ ucfirst($address->address_type) }}
+                            </strong>
+
+                            @if($address->fullname)
+                                {{ $address->fullname }},
+                            @endif
+                            {{ $address->address_line1 }}…
+                        </div>
+                    </label>
                 @endforeach
-            </select>
+
+                <label class="address-card w-100 mb-3">
+                  <input
+                      type="radio"
+                      name="billing_address_id"
+                      value="new"
+                      class="address-radio billing-address-radio"
+                  >
+                  <div class="address-content text-center text-muted">
+                      ➕ Add New Address
+                  </div>
+              </label>
+
+            </div>
         </div>
     @endif
 @endauth
 
-<div id="billing_manual_form" class=" p-3">
+
+
+
+<div
+    id="billing_manual_form"
+    class="p-3 border rounded"
+    style="display:none;"
+>
     <div class="row g-3">
+
         <div class="col-md-12">
             <input type="text" name="billing[name]" class="form-control" placeholder="Full Name">
         </div>
@@ -211,15 +357,30 @@
         <div class="col-12">
             <input type="text" name="billing[address]" class="form-control" placeholder="Address">
         </div>
+
         <div class="col-md-4">
             <input type="text" name="billing[city]" class="form-control" placeholder="City">
         </div>
+
         <div class="col-md-4">
             <input type="text" name="billing[state]" class="form-control" placeholder="State">
         </div>
+
         <div class="col-md-4">
             <input type="text" name="billing[pincode]" class="form-control" placeholder="Pincode">
         </div>
+
+
+        <div class="col-md-12">
+          <label class="fw-bold mb-1">Address Type</label>
+          <select name="billing[address_type]" class="form-control" required>
+              <option value="home">Home</option>
+              <option value="work">Work</option>
+          </select>
+      </div>
+
+
+
     </div>
 </div>
 
@@ -230,251 +391,20 @@
 
     
   @php /*
-
-	<div class="Delvery-address">
-	<h4 class="">Shipping Address</h4>
-	<div class="Shipping-Address-box">
-	<div class="Shipping-address-left">
-	<input type="radio" name="address-f[]" checked>
-	<div class="ship-ff">Bibin <span>Home</span> +353 1 677 3727</div>
-	<div class="ship-ss">Q House Suite 408 76 Furze Rd Sandyford Ind Estate Dublin D18 HH67 Ireland</div>
-	</div>
 	
-	<a onclick="myFunction3()" class="change-add" >Change</a>
-	
-		<div class="Viewmorezsec dropdowna-list" id="myDIV3" style="display:none;" >
-						
-						<div class="row">
-						
-						 <div class="col-lg-12">
-       
-          <div class="row">
-            
-            <div class="col-md-6 form-group">
-              <input type="text" class="form-control"  name="fname" value="" placeholder="Full name" required>
-            </div>
-			   <div class="col-md-6 form-group">
-              <input type="text" class="form-control"  name="fname"  value="" placeholder="Email Id" required>
-            </div>
-         
-             <div class="col-md-12 form-group">
-              <input type="text"  name="address" required class="form-control" value="" placeholder=" Address">
-            </div>
-			  <div class="col-md-6 form-group">
-              <input type="text"  name="building" required class="form-control" value="" placeholder=" Building Name/No">
-            </div>
-			     <div class="col-md-6 form-group">
-              <input type="text"  name="eircode" required class="form-control" value="" placeholder="Eircode">
-            </div>
-			 <div class="col-md-6 form-group">
-            <input type="text"  name="country"  readonly class="form-control" value="" placeholder=" country">
-            </div>
-				 <div class="col-md-6 form-group">
-            <input type="text"  name="city"  readonly class="form-control" value="" placeholder="city">
-            </div>
-            
-          <div class="col-md-6 form-group">
-              <input type="text"  name="building" required class="form-control" value="+353 1 677 3727" placeholder=" Phone No">
-            </div>
-			  <div class="col-md-6 form-group">
-              <input type="text"  name="building" required class="form-control" value="+353 1 677 3727" placeholder=" Alternative Phone No">
-            </div>
-			  <div class="col-md-12 form-group trttrtrtrt">
-             <p>Address Type</p>
-			 
-			 <div class="aadd-tt">
-			 	 <div class="aadd-tt-f">
-			 <input type="radio" name="address-type[]" checked="">Home (All Day Delivery)
-			 </div>
-			 	 <div class="aadd-tt-f">
-			 <input type="radio" name="address-type[]" checked="">Work (Delivery Between  10am To 5pm)
-			 </div>
-			 </div>
-            </div>
-
-
-
-       
-		   <div class="col-md-6  mb-20 ">
-             <button type="submit" class="vs-btn   ">Add</button>
-            </div>
-        
-
-
-          </div>
-        </div>
-						
-						</div>
-						</div>
-	
-	</div>
-
-	</div>
-  
-	
-	<div class="Delvery-address-new">
-	<button class="bt-cc1" onclick="myFunction1()"><i class="fa fa-plus" aria-hidden="true"></i> Add New Shipping Address</button>
-	
-	
-	<div class="Viewmorezsec dropdowna-list" id="myDIV1" style="display:none;">
-						
-						<div class="row">
-						
-						 <div class="col-lg-12">
-       
-
-
-          <div class="row">
-            
-            <div class="col-md-6 form-group"> 
-              <input type="text" class="form-control"  name="fname" placeholder="Full name" required>
-            </div>
-			   <div class="col-md-6 form-group">
-              <input type="text" class="form-control"  name="email" placeholder="Email Id" required>
-            </div>
-         
-             <div class="col-md-12 form-group">
-              <input type="text"  name="address" required class="form-control" placeholder=" Address">
-            </div>
-
-       
-			  <div class="col-md-6 form-group">
-              <input type="text"  name="building" required class="form-control" placeholder=" Building Name/No">
-            </div>
-
-			     <div class="col-md-6 form-group">
-              <input type="text"  name="eircode" required class="form-control" placeholder="Eircode">
-            </div>
-			 <div class="col-md-6 form-group">
-            <input type="text"  name="country"  required class="form-control" placeholder=" country">
-            </div>
-				 <div class="col-md-6 form-group">
-            <input type="text"  name="city"  required class="form-control" placeholder="city">
-            </div>
-            
-          <div class="col-md-6 form-group">
-              <input type="text"  name="phone" required class="form-control" placeholder=" Phone No">
-            </div>
-			  <div class="col-md-6 form-group">
-              <input type="text"  name="phone_alt" required class="form-control" placeholder=" Alternative Phone No">
-            </div>
-			  <div class="col-md-12 form-group trttrtrtrt">
-             <p>Address Type</p>
-			 
-			 <div class="aadd-tt">
-			 	 <div class="aadd-tt-f">
-			 <input type="radio" name="address-typea[]" value="Home" checked="">Home (All Day Delivery)
-			 </div>
-			 	 <div class="aadd-tt-f">
-			 <input type="radio" name="address-typea[]" value="Work" checked="">Work (Delivery Between  10am To 5pm)
-			 </div>
-			 </div>
-            </div>
-
-            
-		        <div class="col-md-12 form-group ">
-             <button type="submit" class="vs-btn ">Add</button>
-            </div>
-            
-
-
-          </div>
-
-
-        </div>
-						
-						</div>
-						</div>
-						
-						
-						
-						
-	</div>
-	
-	
-		<div class="Delvery-address-new">
-	<button class="bt-cc1" ><input name="bill-address" onclick="myFunction2()" type="checkbox" checked> Billing to a Same address?</button>
-	
-	
-	<div class="Viewmorezsec dropdowna-list" id="myDIV2" style="display:none;" >
-						
-						<div class="row">
-						
-						<div class="col-lg-12">
-       
-          <div class="row">
-            
-            <div class="col-md-6 form-group">
-              <input type="text" class="form-control"  name="" placeholder="Full name" >
-            </div>
-			   <div class="col-md-6 form-group">
-              <input type="text" class="form-control"  name="" placeholder="Email Id" >
-            </div>
-         
-             <div class="col-md-12 form-group">
-              <input type="text"   class="form-control" placeholder=" Address">
-            </div>
-			  <div class="col-md-6 form-group">
-              <input type="text"  name=""  class="form-control" placeholder=" Building Name/No">
-            </div>
-			     <div class="col-md-6 form-group">
-              <input type="text"  name=""  class="form-control" placeholder="Eircode">
-            </div>
-			 <div class="col-md-6 form-group">
-            <input type="text"  name=""   class="form-control" placeholder=" country">
-            </div>
-				 <div class="col-md-6 form-group">
-            <input type="text"  name=""   
-            
-            class="form-control" placeholder="city">
-            </div>
-            
-          <div class="col-md-6 form-group">
-              <input type="text"  name=""  class="form-control" placeholder=" Phone No">
-            </div>
-			  <div class="col-md-6 form-group">
-              <input type="text"  name=""  class="form-control" placeholder=" Alternative Phone No">
-            </div>
-			  <div class="col-md-12 form-group trttrtrtrt">
-             <p>Address Type</p>
-			 
-			 <div class="aadd-tt">
-			 	 <div class="aadd-tt-f">
-			 <input type="radio" name="" checked="">Home (All Day Delivery)
-			 </div>
-			 	 <div class="aadd-tt-f">
-			 <input type="radio" name="" checked="">Work (Delivery Between  10am To 5pm)
-			 </div>
-			 </div>
-            </div>
-		   <div class="col-md-6 form-group ">
-             <button type="submit" class="vs-btn   ">Add</button>
-            </div>
-          </div>
-        </div>
-						
-						</div>
-						</div>
-						
-						
-						
-						
-	</div>
-
   */ @endphp
 	 
-		<div class="Delvery-address-new">
+<div class="Delvery-address-new">
 		 
 				<h2 class="h4">	Payment</h2>
 	
 <p>All transactions are secure and encrypted.</p>
 <div class="pay-sec">
 
-<p><strong>Razorpay Secure (UPI, Cards, Int'l Cards, Wallets)</strong></p>
+<p><strong>Stripe Secure (UPI, Cards, Int'l Cards, Wallets)</strong></p>
 <div class="payment dert-pp "> 
-		  <img src="{{asset('img/pay1.jpg')}}" alt=""> <img src="{{asset('img/pay2.jpg')}}" alt=""> <img src="{{asset('img/pay3.jpg')}}" alt=""> <img src="{{asset('img/pay4.jpg')}}" alt=""> <img src="{{asset('img/pay5.jpg')}}" alt=""> <img src="{{asset('img/pay7.jpg')}}" alt=""> </div>
+		  <img src="{{asset('img/pay1.jpg')}}" alt=""> <img src="{{asset('img/pay2.jpg')}}" alt=""> <img src="{{asset('img/pay3.jpg')}}" alt=""> <img src="{{asset('img/pay4.jpg')}}" alt=""> <img src="{{asset('img/pay5.jpg')}}" alt=""> <img src="{{asset('img/pay6.jpg')}}" alt=""> </div>
 </div>
-@php /*<a href="#" class="vs-btn  ">Pay Now</a> */ @endphp
 
 <button type="submit" class="vs-btn ">Pay Now</button>
     
@@ -672,6 +602,74 @@ document.addEventListener('DOMContentLoaded', function () {
 
     sameAsShipping.addEventListener('change', function () {
         billingSection.style.display = this.checked ? 'none' : 'block';
+    });
+
+});
+</script>
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const radios = document.querySelectorAll('.shipping-address-radio');
+    const manualForm = document.getElementById('shipping_manual_form');
+
+    if (!manualForm) return;
+
+    const manualInputs = manualForm.querySelectorAll('input, select, textarea');
+
+    function toggleManualForm(show) {
+        manualForm.style.display = show ? 'block' : 'none';
+
+        manualInputs.forEach(input => {
+            if (show) {
+                input.setAttribute('required', 'required');
+            } else {
+                input.removeAttribute('required');
+            }
+        });
+    }
+
+    radios.forEach(radio => {
+        radio.addEventListener('change', function () {
+            toggleManualForm(this.value === 'new');
+        });
+    });
+
+    // 🔹 Initial state on page load
+    const checked = document.querySelector('.shipping-address-radio:checked');
+    toggleManualForm(!checked || checked.value === 'new');
+
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const billingRadios = document.querySelectorAll('.billing-address-radio');
+    const billingManualForm = document.getElementById('billing_manual_form');
+
+    if (!billingManualForm) return;
+
+    const inputs = billingManualForm.querySelectorAll('input, select, textarea');
+
+    function toggleBillingManual(show) {
+        billingManualForm.style.display = show ? 'block' : 'none';
+
+        inputs.forEach(input => {
+            show
+                ? input.setAttribute('required', 'required')
+                : input.removeAttribute('required');
+        });
+    }
+
+    billingRadios.forEach(radio => {
+        radio.addEventListener('change', function () {
+            toggleBillingManual(this.value === 'new');
+        });
     });
 
 });

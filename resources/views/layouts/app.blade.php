@@ -42,6 +42,8 @@
 
 
 .search-dropdown {
+    max-width: 85%;
+    margin: 0px auto;
     position: absolute;
     top: 100%;
     left: 0;
@@ -139,6 +141,9 @@
         <p class="text-center ssll mt-3">Or Login Using</p>
 
         <div class="row justify-content-center align-items-center facebb-google">
+
+
+            @php /*
             <div class="col-lg-6 col-md-6 col-sm-12 text-center mb-2">
                 <a href="{{ route('customer.social.login', 'google') }}" class="login1">
                     <img src="{{asset('img/goo-gle.png')}}" alt=""> Sign in with Google
@@ -150,6 +155,7 @@
                     <img src="{{asset('img/face-book.png')}}" alt=""> Sign in with Facebook
                 </a>
             </div>
+            */ @endphp
 
             <div class="col-lg-12 text-center mt-2">
                 <div class="llllri">

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\Order;
+use App\Models\CustomerAddress;
 
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
@@ -56,16 +57,36 @@ class CheckoutController extends Controller
          ===================== */
         $customer = auth('customer')->user();
 
-        /* =====================
-         | SHIPPING ADDRESS
-         ===================== */
-        if ($request->filled('shipping_address_id')) {
-            $shipping = \App\Models\Address::findOrFail($request->shipping_address_id)->toArray();
+       /* =====================
+ | SHIPPING ADDRESS
+ ===================== */
+if (
+    auth('customer')->check()
+    && $request->filled('shipping_address_id')
+    && $request->shipping_address_id !== 'new'
+) {
+
+    $address = CustomerAddress::where('id', $request->shipping_address_id)
+        ->where('customer_id', auth('customer')->id())
+        ->firstOrFail();
+
+        $shipping = [
+            'name'     => $address->fullname,
+            'email'    => $address->email,
+            'phone'    => $address->phone,
+            'address'  => $address->address_line1,
+            'city'     => $address->city,
+            'state'    => $address->state,
+            'pincode'  => $address->postal_code,
+            'country'  => $address->country,
+        ];
+
         } else {
+
             $shipping = $request->validate([
                 'shipping.name'     => 'required|string',
                 'shipping.phone'    => 'required|string',
-                'shipping.email'    => 'required|string',
+                'shipping.email'    => 'required|email',
                 'shipping.address'  => 'required|string',
                 'shipping.city'     => 'required|string',
                 'shipping.state'    => 'required|string',
@@ -74,25 +95,47 @@ class CheckoutController extends Controller
         }
 
         /* =====================
-         | BILLING ADDRESS
-         ===================== */
+        | BILLING ADDRESS
+        ===================== */
         if ($request->boolean('same_as_shipping')) {
+
             $billing = $shipping;
+
+        } elseif (
+            auth('customer')->check()
+            && $request->filled('billing_address_id')
+        ) {
+
+        $address = CustomerAddress::where('id', $request->billing_address_id)
+        ->where('customer_id', auth('customer')->id())
+        ->firstOrFail();
+
+        $billing = [
+            'name'     => $address->fullname,
+            'email'    => $address->email,
+            'phone'    => $address->phone,
+            'address'  => $address->address_line1,
+            'city'     => $address->city,
+            'state'    => $address->state,
+            'pincode'  => $address->postal_code,
+            'country'  => $address->country,
+        ];
+
         } else {
-            if ($request->filled('billing_address_id')) {
-                $billing = \App\Models\Address::findOrFail($request->billing_address_id)->toArray();
-            } else {
-                $billing = $request->validate([
-                    'billing.name'     => 'required|string',
-                    'billing.phone'    => 'required|string',
-                    'billing.email'    => 'required|string',
-                    'billing.address'  => 'required|string',
-                    'billing.city'     => 'required|string',
-                    'billing.state'    => 'required|string',
-                    'billing.pincode'  => 'required|string',
-                ])['billing'];
-            }
+
+            $billing = $request->validate([
+                'billing.name'     => 'required|string',
+                'billing.phone'    => 'required|string',
+                'billing.email'    => 'required|email',
+                'billing.address'  => 'required|string',
+                'billing.city'     => 'required|string',
+                'billing.state'    => 'required|string',
+                'billing.pincode'  => 'required|string',
+            ])['billing'];
         }
+
+
+
 
         /* =====================
          | TOTALS

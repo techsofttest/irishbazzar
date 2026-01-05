@@ -54,9 +54,15 @@
 
         <div class="product-thumbs-track">
         
-        <div class="pt active" data-imgbigurl="assets/img/products/p1-1.jpg"><img src="{{asset('storage')}}/{{$product->image}}" alt=""></div>
+        <div class="pt active" data-imgbigurl="{{asset('storage')}}/{{$product->image}}">
+          <img src="{{asset('storage')}}/{{$product->image}}" alt="">
+        </div>
 
-        <div class="pt" data-imgbigurl="assets/img/products/p1-2.jpg"><img src="{{asset('')}}" alt=""></div>
+        @foreach($product->additional_images as $ad_image)
+        <div class="pt" data-imgbigurl="{{asset('storage')}}/{{$ad_image}}">
+          <img src="{{asset('storage')}}/{{$ad_image}}" alt="">
+        </div>
+        @endforeach
          
         </div>
 
@@ -83,7 +89,7 @@
         
           <h2 class="product-title">{{ $product->name }}</h2>
 	
-         <h3 class="rating-ppr"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 100 </h3>
+         <h3 class="rating-ppr"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 1</h3>
           
          <div class="product-info-list">
 
@@ -268,7 +274,7 @@
 
 <div class="rr-counts">
 <h3><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 5 out of 5 </h3>
-<h4>Based on 9 reviews</h4>
+<h4>Based on 1 reviews</h4>
 
 </div>
 </div>
@@ -289,11 +295,13 @@
 </div>
 
 </div>
+
 <div class="col-auto">
 
 <button class="th-btn" data-bs-toggle="modal" data-bs-target="#youmyModal">Write a review</button>
 
 </div>
+
 </div>
 </div>
 </div>
@@ -366,12 +374,13 @@
 <div class="Cework-box-content">
 <div class="Cework-box-img d-flex align-items-center">
 
-<img src="assets/img/ruser.png" alt="">
-<h3> Amal Thomas<span>Verified</span></h3>
+<img src="{{asset('/img/ruser.png')}}" alt="">
+<h3> Amal Thomas</h3>
 </div>
-		<h4>good Product</h4> 
+<h4>Good Product</h4> 
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 </p>
+
 </div>
 </div>
 </div>

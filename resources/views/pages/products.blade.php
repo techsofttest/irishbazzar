@@ -37,6 +37,7 @@
 	<h3 class="ff-filter-heading">Filter:</h3>
 	
 	</div>
+    
 	
 	<div class="ff-availbility">
 	<h3 class="ff-availbility-heading">Availability</h3>
@@ -65,6 +66,8 @@
 						</ul>
 	
 	</div>
+
+
 	<div class="ff-price">
 	
 	<h3 class="ff-price-heading">Price</h3>
