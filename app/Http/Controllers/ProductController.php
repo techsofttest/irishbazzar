@@ -45,26 +45,16 @@ class ProductController extends Controller
         ->where('category_id', $category->id);
 
 
-        // Availability Filter
-            if ($request->in_stock) {
-                $products->where(function ($q) {
-                    $q->whereHas('kidsWearDetails', function ($q2) {
-                        $q2->where('stock', '>', 0);
-                    })->orWhereHas('jewelleryDetails', function ($q2) {
-                        $q2->where('stock', '>', 0);
-                    });
-                });
-            }
-
-            if ($request->out_stock) {
-                $products->where(function ($q) {
-                    $q->whereHas('kidsWearDetails', function ($q2) {
-                        $q2->where('stock', '=', 0);
-                    })->orWhereHas('jewelleryDetails', function ($q2) {
-                        $q2->where('stock', '=', 0);
-                    });
-                });
-            }
+        // DEFAULT → show only in-stock
+    if (!$request->out_stock) {
+        $products->where(function ($q) {
+            $q->whereHas('kidsWearDetails', function ($q2) {
+                $q2->where('stock', '>', 0);
+            })->orWhereHas('jewelleryDetails', function ($q2) {
+                $q2->where('stock', '>', 0);
+            });
+        });
+    }
 
         // Price range (uses lowest_price accessor)
         if ($request->price_from) {
@@ -121,11 +111,12 @@ class ProductController extends Controller
             });
         }
 
-        if ($request->out_stock) {
-            $products->whereHas('jewelleryDetails', function ($q) {
-                $q->where('stock', '=', 0);
-            });
-        }
+        // DEFAULT → show only in-stock
+    if (!$request->out_stock) {
+        $products->whereHas('jewelleryDetails', function ($q) {
+            $q->where('stock', '>', 0);
+        });
+    }
 
     // Price range (uses lowest_price accessor)
     if ($request->price_from) {
@@ -172,12 +163,12 @@ class ProductController extends Controller
         });
     }
 
-    if ($request->out_stock) {
+    // DEFAULT → show only in-stock
+    if (!$request->out_stock) {
         $products->whereHas('kidsWearDetails', function ($q) {
-            $q->where('stock', '=', 0);
+            $q->where('stock', '>', 0);
         });
     }
-
     /* =====================
      | Price Filter
      ===================== */
