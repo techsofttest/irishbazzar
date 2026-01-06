@@ -3,8 +3,37 @@
 
 @section('content')
 
+<style>
+
+#price-slider {
+    margin-top: 8px;
+}
+
+.noUi-target {
+    border-radius: 6px;
+}
+
+.noUi-connect {
+    background: #0d6efd; /* bootstrap primary */
+}
+
+.noUi-handle {
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    top: -6px;
+}
+
+.price-labels {
+    font-size: 14px;
+    color: #333;
+}
+
+</style>
 
 
+<!-- noUiSlider CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.0/nouislider.min.css" rel="stylesheet">
 
 
 <div class="ibm-bcrms-main">
@@ -42,8 +71,11 @@
 	<div class="ff-availbility">
 	<h3 class="ff-availbility-heading">Availability</h3>
 <ul class="ff-availability-ul ">
+
 							<div class="filter-attribute-list-inner">
-								<li class="filter-attribute-item">
+
+                                
+								<li class="filter-attribute-item" style="display:none;">
 									<input class="filter-attribute-checkbox ib-m" type="checkbox" id="in_stock" name="in_stock" value="1"
 									{{ request('in_stock') ? 'checked' : '' }}>
 									<label for="in_stock" class="filter-attribute-label ib-m">
@@ -75,19 +107,33 @@
 	<!--<p>The highest price is € 5,500.00</p>-->
 	
 	<div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-6">
 
-	<input class="field__input" name="price_from" min="0" type="number"
-       placeholder="From" value="{{ request('price_from') }}">
+
+	 <div class="col-12">
+
+        <!-- Price display -->
+        <div class="d-flex justify-content-between mb-2 price-labels">
+            <span>
+                From €<strong id="price-from-label">0</strong>
+            </span>
+            <span>
+                To €<strong id="price-to-label">50000</strong>
+            </span>
+        </div>
+
+        <!-- Slider -->
+        <div id="price-slider"></div>
+
+        <!-- Hidden inputs (used by Laravel request) -->
+        <input type="hidden" name="price_from" id="price_from" value="{{ request('price_from') ?? 0 }}">
+        <input type="hidden" name="price_to" id="price_to" value="{{ request('price_to') ?? 50000 }}">
+
+    </div>
+
 	
 	</div>
 
-	<div class="col-lg-6 col-md-6 col-sm-6">
-	<input class="field__input" name="price_to" min="0" type="number"
-       placeholder="To" value="{{ request('price_to') }}">
-	</div>
-	
-	</div>
+
 	</div>
 		<aside class="sidebar-aa">
 		  <ul class="filter ul-reset">
@@ -234,6 +280,49 @@
 </div>
 
 
+
+<!-- noUiSlider JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.0/nouislider.min.js"></script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    var slider = document.getElementById('price-slider');
+
+    var priceFromInput = document.getElementById('price_from');
+    var priceToInput   = document.getElementById('price_to');
+
+    var priceFromLabel = document.getElementById('price-from-label');
+    var priceToLabel   = document.getElementById('price-to-label');
+
+    var startFrom = parseInt(priceFromInput.value);
+    var startTo   = parseInt(priceToInput.value);
+
+    noUiSlider.create(slider, {
+        start: [startFrom, startTo],
+        connect: true,
+        step: 100,
+        range: {
+            min: 0,
+            max: 50000
+        },
+        format: {
+            to: value => Math.round(value),
+            from: value => Number(value)
+        }
+    });
+
+    slider.noUiSlider.on('update', function (values) {
+        priceFromInput.value = values[0];
+        priceToInput.value   = values[1];
+
+        priceFromLabel.textContent = values[0];
+        priceToLabel.textContent   = values[1];
+    });
+
+});
+</script>
 
 
 @endsection
