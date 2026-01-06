@@ -22,8 +22,8 @@
 
 <link rel="stylesheet" href="{{asset('css/app.min.css')}}">
 <link rel="stylesheet" href="{{asset('css/fa.min.css')}}">
-<link rel="stylesheet" href="{{asset('css/style.min.css?v1.1')}}">
-<link rel="stylesheet" href="{{asset('css/responsive.css')}}">
+<link rel="stylesheet" href="{{asset('css/style.min.css?v1.3')}}">
+<link rel="stylesheet" href="{{asset('css/responsive.css?v1.3')}}">
 <link rel="stylesheet" href="{{asset('css/owl.carousel.css')}}">
 
 <meta name="csrf-token" content="{{ csrf_token() }}">

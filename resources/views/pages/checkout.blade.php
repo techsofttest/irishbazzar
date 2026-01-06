@@ -386,13 +386,8 @@
 
 </div>
 
+</div>
 
-  </div>
-
-    
-  @php /*
-	
-  */ @endphp
 	 
 <div class="Delvery-address-new">
 		 

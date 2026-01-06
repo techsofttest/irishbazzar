@@ -20,6 +20,19 @@
 </style>
 
 
+<style>
+.stars a {
+    font-size: 24px;
+    color: #ccc;
+    text-decoration: none;
+    cursor: pointer;
+}
+.stars a.active {
+    color: #f4c150;
+}
+</style>
+
+
 <script>
     window.productId = {{ $product->id }};
     window.productType = "{{ $product->product_type }}";
@@ -89,7 +102,12 @@
         
           <h2 class="product-title">{{ $product->name }}</h2>
 	
-         <h3 class="rating-ppr"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 1</h3>
+        <h3 class="rating-ppr">
+          @for ($i = 1; $i <= 5; $i++)
+              <i class="fa fa-star {{ $i <= round($reviewStats['avg']) ? '' : 'tt' }}"></i>
+          @endfor
+          {{ $reviewStats['avg'] ?: '0' }}
+        </h3>
           
          <div class="product-info-list">
 
@@ -273,15 +291,28 @@
 <div class="col-auto">
 
 <div class="rr-counts">
-<h3><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 5 out of 5 </h3>
-<h4>Based on 1 reviews</h4>
+
+<h3>{{ number_format($reviewStats['avg'], 1) }} out of 5</h3>
+<h4>Based on {{ $reviewStats['count'] }} reviews</h4>
 
 </div>
 </div>
+
 <div class="col-auto">
 <div class="realsec">
 
 <h4>Real People Real Stories</h4>
+
+@for ($star = 5; $star >= 1; $star--)
+<h3>
+@for ($i = 1; $i <= 5; $i++)
+    <i class="fa fa-star {{ $i <= $star ? '' : 'tt' }}"></i>
+@endfor
+<span>{{ $reviewStats['stars'][$star] ?? 0 }}</span>
+</h3>
+@endfor
+
+@php /*
 <h3><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><span>9</span> </h3>
 <h3><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star tt"></i><span>0</span> </h3>
 
@@ -290,7 +321,7 @@
 <h3><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star tt"></i><i class="fa fa-star tt"></i><i class="fa fa-star tt"></i><span>0</span> </h3>
 
 <h3><i class="fa fa-star"></i><i class="fa fa-star tt"></i><i class="fa fa-star tt"></i><i class="fa fa-star tt"></i><i class="fa fa-star tt"></i><span>0</span> </h3>
-
+*/ @endphp
 
 </div>
 
@@ -298,7 +329,17 @@
 
 <div class="col-auto">
 
-<button class="th-btn" data-bs-toggle="modal" data-bs-target="#youmyModal">Write a review</button>
+
+@if($canReview)
+<button class="th-btn review_view_btn">
+    Write a review
+</button>
+@elseif(!auth('customer')->check())
+<button class="th-btn" onclick="Swal.fire('Login required','Please login to review','warning')">
+    Write a review
+</button>
+@endif
+
 
 </div>
 
@@ -310,41 +351,46 @@
 <div class="row justify-content-center align-items-center" >
 <div class="col-lg-9">
 
-<div class="th-comment-form review-form" id="myDIV" style="display: none;">
-            <div class="form-title">
-              <h3 class="blog-inner-title">Write a review</h3>
-            </div>
-            <div class="row">
-              <div class="  rating-select  ">
-                <label class="text-center">  Rating</label>
-              
-              </div>
-			       <div class="form-group rating-select  ">
-           
-                <p class="stars selected"><span><a class="star-1" href="#">1</a> <a class="star-2" href="#">2</a> <a class="star-3" href="#">3</a> <a class="star-4" href="#">4</a> <a class="star-5 active" href="#">5</a></span></p>
-              </div>
-                           <div class="col-md-4 form-group">
-                <input type="text" placeholder="Title" class="form-control">
-                <i class="text-title far fa-user"></i></div>
-              <div class="col-md-4 form-group">
-                <input type="text" placeholder="Your Name" class="form-control">
-                <i class="text-title far fa-user"></i></div>
-              <div class="col-md-4 form-group">
-                <input type="text" placeholder="Your Email" class="form-control">
-                <i class="text-title far fa-envelope"></i></div>
-				   <div class="col-md-12 form-group">
-                <textarea placeholder="Write a Message" class="form-control"></textarea>
-                <i class="text-title far fa-pencil-alt"></i>
-				</div>
-            
-              <div class="col-12 form-group mb-0">
-                <button class="th-btn">Post Review</button>
-              </div>
-            </div>
-          </div>
+        @if($canReview)
+<div class="th-comment-form review-form">
+    <div class="form-title">
+        <h3 class="blog-inner-title">Write a review</h3>
+    </div>
+
+    <form method="POST" action="{{ route('products.reviews.store', $product->id) }}">
+        @csrf
+
+        <!-- Rating -->
+        <div class="form-group rating-select text-center mb-3">
+            <label>Rating</label>
+            <p class="stars" id="rating-stars">
+                @for($i = 1; $i <= 5; $i++)
+                    <a href="#" data-value="{{ $i }}" class="star star-{{ $i }}">★</a>
+                @endfor
+            </p>
+            <input type="hidden" name="rating" id="rating" value="5">
+        </div>
+
+        <!-- Review -->
+        <div class="col-md-12 form-group">
+            <textarea
+                name="review"
+                placeholder="Write your review"
+                class="form-control"
+                required
+                minlength="10"></textarea>
+            <i class="text-title far fa-pencil-alt"></i>
+        </div>
+
+        <div class="col-12 form-group mb-0 text-center">
+            <button type="submit" class="th-btn">Post Review</button>
+        </div>
+    </form>
+</div>
+@endif
 		
-  </div>
-          </div>
+</div>
+</div>
 		  
 		  
 		  <div class="th-sort-bar">
@@ -368,22 +414,32 @@
 		  
 		  <div class="row  gal-row grid-container gutter-30 has-init-isotope" >
 
-            <div class="col-lg-4 col-md-4 col-sm-6 rounded img-hover-wrap" >
-             <div class="Ceworkforce-box  " data-aos="zoom-out" data-aos-duration="800">
-<h5><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>   </h5>
-<div class="Cework-box-content">
-<div class="Cework-box-img d-flex align-items-center">
+ 
+      @forelse($product->approvedReviews as $review)
+      <div class="col-lg-4 col-md-4 col-sm-6">
+          <div class="Ceworkforce-box">
+              <h5>
+                  @for ($i = 1; $i <= 5; $i++)
+                      <i class="fa fa-star {{ $i <= $review->rating ? '' : 'tt' }}"></i>
+                  @endfor
+              </h5>
 
-<img src="{{asset('/img/ruser.png')}}" alt="">
-<h3> Amal Thomas</h3>
-</div>
-<h4>Good Product</h4> 
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-</p>
+              <div class="Cework-box-content">
+                  <div class="Cework-box-img d-flex align-items-center">
+                      <img src="{{ asset('/img/ruser.png') }}" alt="">
+                      <h3>{{ $review->customer->first_name }}</h3>
+                  </div>
 
-</div>
-</div>
-</div>
+                  <p>{{ $review->review }}</p>
+              </div>
+          </div>
+      </div>
+      @empty
+      <p class="text-center">No reviews yet.</p>
+      @endforelse
+ 
+      
+
     
 </div>
          
@@ -465,7 +521,7 @@
 <script src="{{asset('js/jquery.zoom.min.js')}}"></script> 
 
 <script src="{{asset('js/jquery-ui.min.js')}}"></script> 
-<script src="{{asset('js/mains.js')}}"></script>
+<script src="{{asset('js/mains.js?v1.0')}}"></script>
 
 <script src="{{asset('js/functions.js')}}"></script> 
 <script src="{{asset('js/plugins.min.js')}}"></script>
@@ -674,6 +730,30 @@ $(document).ready(function () {
             complete: function () {
                 btn.removeClass('loading');
             }
+        });
+    });
+
+});
+</script>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const stars = document.querySelectorAll('#rating-stars .star');
+    const ratingInput = document.getElementById('rating');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const value = this.dataset.value;
+            ratingInput.value = value;
+
+            stars.forEach(s => {
+                s.classList.toggle('active', s.dataset.value <= value);
+            });
         });
     });
 

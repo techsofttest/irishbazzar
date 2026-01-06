@@ -202,4 +202,33 @@ public function isWishlistedByCustomer()
 
 
 
+/* ======================
+ | REVIEWS
+ ====================== */
+
+public function reviews()
+{
+    return $this->hasMany(ProductReview::class);
+}
+
+public function approvedReviews()
+{
+    return $this->reviews()->where('is_approved', true);
+}
+
+public function getAverageRatingAttribute()
+{
+    return round($this->approvedReviews()->avg('rating'), 1);
+}
+
+public function getReviewsCountAttribute()
+{
+    return $this->approvedReviews()->count();
+}
+
+
+
+
+
+
 }

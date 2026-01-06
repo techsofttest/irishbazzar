@@ -9,6 +9,9 @@ use App\Models\ProductVarient;
 
 use App\Models\Category;
 
+use App\Models\ProductReview;
+use App\Models\OrderItem;
+
 use Illuminate\Support\Facades\DB;
 
 
@@ -198,7 +201,8 @@ class ProductController extends Controller
     'kidsWearDetails.size',
     'kidsWearDetails.color',
     'jewelleryDetails.size',
-    'type'
+    'type',
+    'approvedReviews.customer'
     ])
     ->where('slug', $slug)
     ->where('is_active', 1)
@@ -212,6 +216,32 @@ class ProductController extends Controller
 
     // Colors
     $data['colors'] = $data['variants']->pluck('color')->filter()->unique('id')->values();
+
+
+
+    // ⭐ Review stats
+    $data['reviewStats'] = [
+        'avg'   => $data['product']->average_rating ?? 0,
+        'count' => $data['product']->reviews_count ?? 0,
+        'stars' => $data['product']->approvedReviews()
+            ->selectRaw('rating, COUNT(*) as total')
+            ->groupBy('rating')
+            ->pluck('total', 'rating')
+            ->toArray(),
+    ];
+
+    // ✔ Can customer review?
+    $data['canReview'] = auth('customer')->check()
+        && \App\Models\ProductReview::customerHasPurchasedProduct(
+            auth('customer')->id(),
+            $data['product']->id
+        )
+        && ! $data['product']->reviews()
+            ->where('customer_id', auth('customer')->id())
+            ->exists();
+
+
+
 
     $data['related'] = Product::where('is_active', 1)
     ->where('id', '!=', $data['product']->id)
@@ -292,6 +322,54 @@ class ProductController extends Controller
     }
 
 
+
+
+
+    public function storeReview(Request $request, Product $product)
+{
+    $customer = auth('customer')->user();
+    abort_if(!$customer, 403);
+
+    // ✔ Validate
+    $request->validate([
+        'rating' => 'required|integer|min:1|max:5',
+        'review' => 'required|string|min:10',
+    ]);
+
+    // ✔ Must have purchased
+    abort_if(
+        !ProductReview::customerHasPurchasedProduct($customer->id, $product->id),
+        403,
+        'You must purchase this product before reviewing.'
+    );
+
+    // ✔ One review per customer
+    abort_if(
+        ProductReview::where('product_id', $product->id)
+            ->where('customer_id', $customer->id)
+            ->exists(),
+        403,
+        'You already reviewed this product.'
+    );
+
+    // ✔ Get order ID (first paid order containing this product)
+    $orderId = OrderItem::where('product_id', $product->id)
+        ->whereHas('order', function ($q) use ($customer) {
+            $q->where('customer_id', $customer->id)
+              ->where('payment_status', 'paid');
+        })
+        ->value('order_id');
+
+    ProductReview::create([
+        'product_id'  => $product->id,
+        'customer_id' => $customer->id,
+        'order_id'    => $orderId,
+        'rating'      => $request->rating,
+        'review'      => $request->review,
+    ]);
+
+    return back()->with('success', 'Review submitted for approval.');
+}
 
 
 

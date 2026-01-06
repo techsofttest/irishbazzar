@@ -367,7 +367,11 @@ $(".ishicategoryblock-carousel").owlCarousel({
 	});
 
 
-	$('.product-pic-zoom').zoom();
+	$('.product-pic-zoom').zoom({
+		touch :false,
+		on:'mouseover',
+	});
+	
 	/*------------------
 		start sticky
 	--------------------*/

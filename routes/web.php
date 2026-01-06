@@ -152,7 +152,16 @@ Route::middleware('auth:customer')->group(function () {
     Route::get('/change-password', [CustomerPasswordController::class, 'view'])->name('customer.changepass');
     Route::post('/customer/password/update', [CustomerPasswordController::class, 'update'])->name('customer.password.update');
 
+
+
+
 });
+
+
+Route::post(
+    '/products/{product}/reviews',
+    [ProductController::class, 'storeReview']
+)->name('products.reviews.store');
 
 
 //Customer Routes ENd
